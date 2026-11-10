@@ -35,12 +35,10 @@ TIMEOUT_MIN = int(os.environ.get("TIMEOUT_MIN", "20"))
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .apt_install("build-essential", "wget")  # triton compiles its launcher with gcc
-    .run_commands(  # Nsight Systems CLI from NVIDIA's CUDA repo, for kernel-level timelines
-        "wget -qO /tmp/cuda-keyring.deb https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb",
-        "dpkg -i /tmp/cuda-keyring.deb && apt-get update && apt-get install -y --no-install-recommends nsight-systems-2026.3.2",
-        "ln -sf $(ls -d /opt/nvidia/nsight-systems/*/bin/nsys | head -1) /usr/local/bin/nsys",
-    )
+    .apt_install("build-essential")  # triton compiles its launcher with gcc
+    # Nsight Systems is optional for the early chapters.  NVIDIA's Debian 12
+    # repository currently fails signature verification on Modal's newer base
+    # image, so install it separately when kernel-level nsys traces are needed.
     .pip_install("torch==2.6.0", "transformers>=4.51,<5", "xxhash", "huggingface_hub", "pytest")
     .pip_install(
         "https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.4.post1/"
